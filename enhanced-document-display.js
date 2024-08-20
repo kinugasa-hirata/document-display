@@ -1,4 +1,5 @@
-// enhanced-document-display.js
+console.log("スクリプトが実行されています");
+
 const documentContent = `2024.8.19
 衣笠
 
@@ -58,29 +59,31 @@ function formatContent(content) {
     let inList = false;
 
     lines.forEach((line, index) => {
+        let elementContent = '';
         if (index === 0) {
-            formattedContent += `<div class="date">${line}</div>`;
+            elementContent = `<div class="date reveal">${line}</div>`;
         } else if (line.startsWith('[') && line.endsWith(']')) {
-            formattedContent += `<h2 class="section-title">${line.slice(1, -1)}</h2>`;
+            elementContent = `<h2 class="section-title reveal">${line.slice(1, -1)}</h2>`;
         } else if (line.trim() === '') {
             if (inList) {
-                formattedContent += '</ul>';
+                elementContent += '</ul>';
                 inList = false;
             }
-            formattedContent += '<br>';
+            elementContent += '<br>';
         } else if (line.trim().startsWith('•')) {
             if (!inList) {
-                formattedContent += '<ul>';
+                elementContent += '<ul>';
                 inList = true;
             }
-            formattedContent += `<li>${line.trim().substring(1).trim()}</li>`;
+            elementContent += `<li class="reveal">${line.trim().substring(1).trim()}</li>`;
         } else {
             if (inList) {
-                formattedContent += '</ul>';
+                elementContent += '</ul>';
                 inList = false;
             }
-            formattedContent += `<p>${highlightKeywords(line)}</p>`;
+            elementContent += `<p class="reveal">${highlightKeywords(line)}</p>`;
         }
+        formattedContent += `<div class="reveal-container">${elementContent}</div>`;
     });
 
     return formattedContent;
@@ -106,9 +109,37 @@ function highlightKeywords(text) {
     return text;
 }
 
+function checkScroll() {
+    const revealContainers = document.querySelectorAll('.reveal-container');
+    const windowHeight = window.innerHeight;
+    const resetPoint = windowHeight * 0.1; // 10% of viewport height
+
+    revealContainers.forEach((container) => {
+        const revealer = container.querySelector('.reveal');
+        if (revealer) {
+            const rect = container.getBoundingClientRect();
+            const revealTop = rect.top;
+            const revealBottom = rect.bottom;
+
+            if (revealTop < windowHeight - 150 && revealBottom > 0) {
+                revealer.classList.add('active');
+                revealer.classList.remove('reset');
+            } else if (revealTop > windowHeight - resetPoint || revealBottom < resetPoint) {
+                revealer.classList.remove('active');
+                revealer.classList.add('reset');
+            }
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const contentDiv = document.getElementById('documentContent');
     if (contentDiv) {
         contentDiv.innerHTML = formatContent(documentContent);
     }
+    
+    window.addEventListener('scroll', checkScroll);
+    checkScroll(); // Initial check
 });
+
+console.log("スクリプトの実行が完了しました");
