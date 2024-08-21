@@ -109,6 +109,70 @@ function highlightKeywords(text) {
     return text;
 }
 
+function populateProgressTable() {
+    const tableBody = document.querySelector('#progressTable tbody');
+    const progressData = [
+        { item: 'ダンベル試験片', status: '完了', notes: '評価作業中' },
+        { item: 'ロアスペーサー', status: '進行中', notes: '材料調達待ち' },
+        { item: 'キャップ', status: '遅延', notes: '設計変更のため' },
+        { item: 'ディップスポット', status: '計画段階', notes: '来週開始予定' },
+        { item: '樹脂ピン', status: '保留', notes: '優先度再検討中' }
+    ];
+
+    progressData.forEach(row => {
+        const tr = document.createElement('tr');
+        tr.innerHTML = `
+            <td>${row.item}</td>
+            <td>${row.status}</td>
+            <td>${row.notes}</td>
+        `;
+        tableBody.appendChild(tr);
+    });
+}
+
+function createBudgetChart() {
+    const ctx = document.getElementById('budgetChart').getContext('2d');
+    new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: ['4月', '5月', '6月', '7月', '8月'],
+            datasets: [{
+                label: '予算残高 (%)',
+                data: [100, 90, 80, 70, 60],
+                fill: false,
+                borderColor: 'rgb(75, 192, 192)',
+                tension: 0.1
+            }]
+        },
+        options: {
+            responsive: true,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 100,
+                    title: {
+                        display: true,
+                        text: '予算残高 (%)'
+                    }
+                },
+                x: {
+                    title: {
+                        display: true,
+                        text: '月'
+                    }
+                }
+            }
+        }
+    });
+}
+
+function setupDetailsButton() {
+    const detailsButton = document.getElementById('detailsButton');
+    detailsButton.addEventListener('click', () => {
+        window.location.href = 'details.html';
+    });
+}
+
 function checkScroll() {
     const revealContainers = document.querySelectorAll('.reveal-container');
     const windowHeight = window.innerHeight;
@@ -132,14 +196,34 @@ function checkScroll() {
     });
 }
 
+function checkSlideIn() {
+    const slideElements = document.querySelectorAll('.slide-in-right');
+    const windowHeight = window.innerHeight;
+
+    slideElements.forEach((element) => {
+        const elementTop = element.getBoundingClientRect().top;
+        if (elementTop < windowHeight - 150) {
+            element.classList.add('active');
+        }
+    });
+}
+
 document.addEventListener('DOMContentLoaded', () => {
     const contentDiv = document.getElementById('documentContent');
     if (contentDiv) {
         contentDiv.innerHTML = formatContent(documentContent);
     }
     
-    window.addEventListener('scroll', checkScroll);
+    populateProgressTable();
+    createBudgetChart();
+    setupDetailsButton();
+    
+    window.addEventListener('scroll', () => {
+        checkScroll();
+        checkSlideIn();
+    });
     checkScroll(); // Initial check
+    checkSlideIn(); // Initial check
 });
 
 console.log("スクリプトの実行が完了しました");
